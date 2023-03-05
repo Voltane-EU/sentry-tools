@@ -1,13 +1,4 @@
 # sentry-tools
 
-## Installation
-
-`pip install sentry-tools sentry`
-
-## Usage
-
-<!-- ### ⚠️ WARNING
-
-Sentry needs to be installed and activated in your project, otherwise the tools will do nothing.
-
-`pip install sentry-sdk` -->
+Tools for integrating sentry in other libraries without having a fixed dependency to sentry.
+Implements several sentry methods, which simply pass if sentry is not used.
