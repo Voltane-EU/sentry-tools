@@ -9,7 +9,12 @@ except ImportError:
     Hub = None
 
 
-def instrument_span(op: Optional[str] = None, description: Optional[Union[str, Callable[..., str]]] = None, force_new_span: bool = False, **instrument_kwargs):
+def instrument_span(
+    op: Optional[str] = None,
+    description: Optional[Union[str, Callable[..., str]]] = None,
+    force_new_span: bool = False,
+    **instrument_kwargs,
+):
     def wrapper(wrapped):
         @wraps(wrapped)
         def with_instrumentation(*args, **kwargs):
@@ -32,24 +37,30 @@ def instrument_span(op: Optional[str] = None, description: Optional[Union[str, C
 
                 return wrapped(*args, **kwargs)
 
-        return with_instrumentation
+        if Hub:
+            return with_instrumentation
+
+        return wrapped
 
     return wrapper
 
 
 def capture_exception(func: Optional[Callable] = None):
-    def _capture_exception(func: Callable):
-        @wraps(func)
+    def _capture_exception(wrapped: Callable):
+        @wraps(wrapped)
         def wrapper(*args, **kwargs):
             try:
-                return func(*args, **kwargs)
+                return wrapped(*args, **kwargs)
 
             except Exception as error:
                 set_tag('capture_exception.function', f'{func.__module__}.{func.__qualname__}')
                 sentry_capture_exception(error)
                 raise
 
-        return wrapper
+        if Hub:
+            return wrapper
+
+        return wrapped
 
     if func:
         return _capture_exception(func)
